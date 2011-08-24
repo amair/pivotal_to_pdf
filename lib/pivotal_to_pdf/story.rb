@@ -4,6 +4,18 @@ class Story < Pivotal
     labels
   end
 
+  def task_list
+    return "" if !self.respond_to?(:tasks) || self.tasks.nil? || self.tasks.empty?
+      task_string=""
+      tasks.each do |task|
+        if (!task.complete)
+          task_string = task_string << "* " << task.description << "\n" 
+        end
+      end
+
+    return task_string
+  end
+
   def points
     return nil unless self.feature?
     "Points: " + (self.respond_to?(:estimate) && !self.estimate.eql?(-1) ? self.estimate.to_s : "Not yet estimated")
