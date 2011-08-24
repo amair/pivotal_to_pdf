@@ -89,7 +89,7 @@ class PdfWriter
 
         end
       end
-      pdf.number_pages "<page>/<total>", {:at => [pdf.bounds.right - 16.mm, 2.mm]}
+#      pdf.number_pages "<page>/<total>", {:at => [pdf.bounds.right - 16.mm, 2.mm]}
 
       puts ">>> Generated PDF file in '#{story_or_iteration.id}.pdf'".foreground(:green)
                              end
