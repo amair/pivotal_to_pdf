@@ -14,13 +14,21 @@ class PdfWriter
 
   def initialize(story_or_iteration, colored_stripe = true)
     @story_or_iteration = story_or_iteration
-    @stories = story_or_iteration.is_a?(Iteration) ? story_or_iteration.stories : [story_or_iteration]
-    p stories.size
+    if story_or_iteration.is_a?(Iteration)
+      @stories = story_or_iteration.stories
+      @filename = "Iteration " << story_or_iteration.id.to_s << ".pdf"
+    elsif story_or_iteration.is_a?(Array)
+      @stories = story_or_iteration.dup
+      @filename = "Stories from " << @stories.first.id.to_s << ".pdf"
+    else
+      @stories = [story_or_iteration]
+      @filename = "Story " << story_or_iteration.id.to_s << ".pdf"
+    end
   end
 
   def write_to
 
-    Prawn::Document.generate("#{story_or_iteration.id}.pdf",
+    Prawn::Document.generate(@filename,
                              :page_layout => :landscape,
                              :page_size => "A4",
                              :margin => [12.mm, 12.mm, 10.mm, 10.mm]) do |pdf|
@@ -35,18 +43,11 @@ class PdfWriter
         # that still have work to be done (aren't accepted)
         if story.story_type != "release" && story.current_state != "accepted"
 
-          puts story.current_state
-
           bb = Hash.new
           bb = get_bounding_box(index %4)
-          #        bb.each do|name,val|
-          #          puts "#{name}: #{val}"
-          #        end
 
           # --- Write content
           pdf.bounding_box [bb[:left], bb[:top]], :width => bb[:width], :height => bb[:height] do
-
-            #        puts "top: #{pdf.bounds.absolute_top} left: #{pdf.bounds.absolute_left} right: #{pdf.bounds.absolute_right} bottom: #{pdf.bounds.absolute_bottom}"
 
             pdf.stroke_color = story.story_color unless story.story_color.nil?
             pdf.line_width=6
@@ -54,12 +55,6 @@ class PdfWriter
 
             # We want to inset the text from the border which has been painted
             pdf.bounding_box [MARGIN, pdf.bounds.top-MARGIN], :width => 120.mm, :height => bb[:height] - MARGIN*2 do
-
-              #            puts "INSET top: #{pdf.bounds.absolute_top} left: #{pdf.bounds.absolute_left} right: #{pdf.bounds.absolute_right} bottom: #{pdf.bounds.absolute_bottom}"
-
-              #            pdf.stroke_color = "000000"
-              #            pdf.line_width=1
-              #            pdf.stroke_bounds
 
               pdf.text story.name, :size => 14
               pdf.fill_color "52D017"
@@ -84,14 +79,16 @@ class PdfWriter
           index = index + 1
 
           if (index % 4) == 0
-            pdf.start_new_page unless index == stories.size - 1
+            pdf.start_new_page unless index == stories.size
           end
+
+        else puts "Skipping story (" << story.id.to_s << ") "<< story.name
 
         end
       end
-#      pdf.number_pages "<page>/<total>", {:at => [pdf.bounds.right - 16.mm, 2.mm]}
+      #      pdf.number_pages "<page>/<total>", {:at => [pdf.bounds.right - 16.mm, 2.mm]}
 
-      puts ">>> Generated PDF file in '#{story_or_iteration.id}.pdf'".foreground(:green)
+      puts ">>> Generated PDF file in '#{@filename}'".foreground(:green)
                              end
   rescue Exception
     puts "[!] There was an error while generating the PDF file... What happened was:".foreground(:red)

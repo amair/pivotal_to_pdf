@@ -13,6 +13,17 @@ class PivotalToPdf < Thor
       PdfWriter.new(story, colored_stripe).write_to
     end
 
+    def stories(*story_ids)
+      storylist = Array.new
+      story_ids.each { |s|
+        story = Story.find(s)
+        storylist.push(story)
+      }
+
+#      storylist.each { |z| puts z.id}
+      PdfWriter.new(storylist, true).write_to
+    end
+
     def iteration(iteration_token, colored_stripe=true)
       iteration = Iteration.find(:all, :params => {:group => iteration_token}).first
       PdfWriter.new(iteration, colored_stripe).write_to
