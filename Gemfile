@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 gem 'rainbow'
 gem 'activeresource', '>= 5.0.0'
 gem 'prawn'
-gem 'thor'
+gem 'thor', '>= 1.4.0'
 group :test do
   gem 'rspec'
 end
